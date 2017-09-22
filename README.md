@@ -1,0 +1,2 @@
+# TwitchBot
+Self Coded TwitchBot
