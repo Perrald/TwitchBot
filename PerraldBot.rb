@@ -25,4 +25,35 @@ class TwitchBot
 		write_to_system "PRIVMSG ##{@channel} :#{message}"
 	end
 	
+	def run 
+		until @socket.eof? do
+			message = @socket.gets
+			puts message
+			
+			if message.match(/^PING :(.*)$/)
+				write_to_system "PONG #{$~[1]}"
+				next
+			end
+			
+			if message.match(/PRIVMSG ##{@channel} :(.*)$/)
+				content = $~[1]
+				
+				if content.include? "coffee"
+					write_to_chat("COFFEE!!!")
+				end
+			end
+			
+		end
+	end
+	
+	def quit
+		write_to_chat "#{@nickname} is Leaving"
+		write_to_system "PART ##{@channel}"
+		write_to_system "QUIT"
+	end
+	
 end
+
+bot = TwitchBot.new
+trap("INT") { bot.quit }
+bot.run
