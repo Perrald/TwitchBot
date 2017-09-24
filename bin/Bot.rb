@@ -7,5 +7,3 @@ require 'PerraldBot'
 bot = PerraldBot::TwitchBot.new
 trap("INT") { bot.quit }
 bot.run
-#while (bot.running) do
-#end

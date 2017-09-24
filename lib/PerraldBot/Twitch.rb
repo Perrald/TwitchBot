@@ -3,16 +3,16 @@ require 'socket'
 module PerraldBot
 	TWITCH_HOST = "irc.twitch.tv"
 	TWITCH_PORT = 6667
-
+	
 	class TwitchBot
-
+		attr_reader :nickname, :password, :channel, :socket, :command_hash, :running
+		
 		def initialize
 			@running = false
 			@nickname = "PerraldBot"
 			@password = ENV['TWITCH_OATH']
 			@channel = "squalami"
 			@socket =  TCPSocket.open(TWITCH_HOST, TWITCH_PORT)
-			
 			write_to_system "pass #{@password}"	
 			write_to_system	"NICK #{@nickname}"
 			write_to_system "USER #{@nickname} 0 * #{@nickname}"
@@ -27,7 +27,18 @@ module PerraldBot
 			write_to_system "PRIVMSG ##{@channel} :#{message}"
 		end
 		
+		def reload_hash(user)
+			coins = 0 #change this to grab coins
+			command_hash = {'!hello'		=>"Hello #{user} from PerraldBot!",
+							'!hi'			=>'hi :)',
+							'!coins'		=>"#{user} has #{coins} coins",
+							''				=>''}
+							
+			return command_hash
+		end
+		
 		def parse_message
+			command_hash = reload_hash('test')
 			until @socket.eof? do
 				message = @socket.gets
 				puts message
@@ -40,14 +51,10 @@ module PerraldBot
 				if message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*)$/)
 					user = $~[1]
 					command = $~[3]
-					#reloading the hash seems wrong....
-					h = {'!hello'=>"Hello #{user} from PerraldBot!",'!hi'=>'hi :)'}
-					if h.fetch(h.keys.find{|key|command[key]}, "no key")!="no key"
-						write_to_chat(h.fetch(h.keys.find{|key|command[key]}))
+					if command_hash.fetch(command_hash.keys.find{|key|command[key]}, "no key")!="no key"
+						command_hash = reload_hash(user)
+						write_to_chat(command_hash.fetch(command_hash.keys.find{|key|command[key]}))
 					end
-					#if command.include? "!hello"
-					#	write_to_chat("Hello #{user}from PerraldBot!")
-					#end
 				end
 				
 			end
