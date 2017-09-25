@@ -16,3 +16,11 @@ Test Push
 * Hash
 	* Change Hash Values to Lambda Functions
 	
+* Commands
+	* !Bet
+	* !Points
+	* !Shop
+	* !Give
+	* !YouTube
+	* !Twitter
+	
