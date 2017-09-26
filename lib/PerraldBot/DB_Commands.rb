@@ -42,7 +42,11 @@ module PerraldBot
 	###################
 	#Getter DB commands
 	###################
-
+	#
+    # result is an array: user[0] = id, user[1] = username, user[2] = points, 
+    # user[3] = created, user[4] = last_seen, user[5] = admin, user[6] = profile
+    # 
+	
 	def get_user(name)
 		username = name.downcase
 		begin
