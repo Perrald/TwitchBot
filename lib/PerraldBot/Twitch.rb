@@ -1,4 +1,6 @@
 require 'socket'
+require 'sqlite3'
+require '../lib/PerraldBot/DB_Commands'
 
 module PerraldBot
 	TWITCH_HOST = "irc.twitch.tv"
@@ -8,15 +10,32 @@ module PerraldBot
 		attr_reader :nickname, :password, :channel, :socket, :command_hash, :running
 		
 		def initialize
+		
 			@running = false
 			@nickname = "PerraldBot"
 			@password = ENV['TWITCH_OATH']
 			@channel = "squalami"
 			@socket =  TCPSocket.open(TWITCH_HOST, TWITCH_PORT)
+			
+			#Connect to the TWITCH channel
 			write_to_system "pass #{@password}"	
 			write_to_system	"NICK #{@nickname}"
 			write_to_system "USER #{@nickname} 0 * #{@nickname}"
 			write_to_system "JOIN ##{@channel}"
+			
+			#Create the DBs if they don't exist
+			@db = SQLite3::Database.new "../config/PerraldBot.db"
+			
+			#Init Tables
+			
+			#User TABLE
+			@db.execute "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, points INT, created BIGINT, last_active BIGINT, admin INT, bio TEXT)"
+			@db.execute "CREATE UNIQUE INDEX IF NOT EXISTS username ON users (username)"
+			
+			#Item Tables
+			@db.execute "CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, description TEXT, price INT, ownable INT, timestamp BIGINT)"
+			@db.execute "CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY, user_id INT, item_id INT, timestamp BIGINT)"
+			
 		end
 
 		def write_to_system(message)
