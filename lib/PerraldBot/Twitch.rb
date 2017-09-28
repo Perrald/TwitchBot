@@ -1,6 +1,8 @@
 require 'socket'
 require 'sqlite3'
+require 'json'
 require '../lib/PerraldBot/DB_Commands'
+require 'net/http'
 
 module PerraldBot
 	TWITCH_HOST = "irc.twitch.tv"
@@ -67,9 +69,52 @@ module PerraldBot
 					next
 				end
 				
+				if message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*) (.*)$/)
+					user = $~[1]
+					command = $~[3]
+					args = $~[4]
+					if command.include? "!grant"
+						tempname = get_user(user)
+						if (tempname)
+							points = args.to_i + tempname[2].to_i
+							set_points(tempname[0], points)
+							write_to_chat("Giving #{tempname[1]} #{args.to_i} points, their total is now #{points}")
+						end
+					end
+					if command.include? "!makeadmin"
+						#Check if User trying to grant admin status is an admin
+						if(user_is_an_admin(user))
+							user_to_make_admin = get_user(args.strip)
+							if (user_to_make_admin)
+								set_admin(user_to_make_admin[0], 1)
+								write_to_chat("#{user_to_make_admin[1]} is now an Admin")
+							end
+						else
+							write_to_chat("#{user} can't grant Admin status")
+						end
+					end
+				end
+				
+# result is an array: user[0] = id, user[1] = username, user[2] = points, 
+# user[3] = created, user[4] = last_seen, user[5] = admin, user[6] = profile
+# 
+				
 				if message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*)$/)
 					user = $~[1]
 					command = $~[3]
+					if command.include? "!add"
+						tempname = get_user(user)
+						if (tempname)
+							write_to_chat("#{tempname[1]} exists, has #{tempname[2].to_i} points")
+						else
+							create_user(user)
+							write_to_chat("#{user} added to the DB")
+						end
+					end
+					if command.include? "!here"
+						all_users_in_channel = get_all_users_in_channel
+						write_to_chat("Users here:" + all_users_in_channel.to_s)
+					end
 					if command_hash.fetch(command_hash.keys.find{|key|command[key]}, "no key")!="no key"
 						command_hash = reload_hash(user)
 						write_to_chat(command_hash.fetch(command_hash.keys.find{|key|command[key]}))
@@ -90,6 +135,38 @@ module PerraldBot
 			write_to_chat "#{@nickname} is Leaving"
 			write_to_system "PART ##{@channel}"
 			write_to_system "QUIT"
+		end
+		
+		def user_is_an_admin(user)
+			puts "checking admin for: #{user}"
+			check_this_user = get_user(user)
+			if (check_this_user)
+				if (check_this_user[5] == 1) || user == @channel
+					return true
+				else
+					return false
+				end
+			end
+		end
+		
+		def get_all_users_in_channel
+			url_string = "https://tmi.twitch.tv/group/user/"+ @channel + "/chatters"
+			puts url_string
+			result = Net::HTTP.get(URI.parse(url_string))
+			parsed = JSON.parse(result)
+
+			all_users_in_channel = []
+			
+			parsed["chatters"]["moderators"].each do |p|
+				all_users_in_channel << p
+			end
+			
+			parsed["chatters"]["viewers"].each do |p|
+				all_users_in_channel << p
+			end
+			
+			puts "Users here:" + all_users_in_channel.to_s
+			return all_users_in_channel
 		end
 		
 	end
