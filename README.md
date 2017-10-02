@@ -8,13 +8,12 @@ Test Push
 #######################################################
 
 * SQLITE3
-	* Create User DB
 	* Create Item DB
-	* Create Action DB
+	* Create Action DB (This is for Admins to Create Call and response functions) 
 	* Create Functions to Manage/Interact With DBs
 	
 * Hash
-	* Change Hash Values to Lambda Functions
+	* Change Hash Values to Commands in the Action DB
 	
 * Commands
 	* !Bet

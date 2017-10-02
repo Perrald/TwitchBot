@@ -3,6 +3,8 @@
 #Setter DB commands
 ###################
 
+######User DB######
+
 def create_user(name)
 	username = name.downcase
 	begin
@@ -36,6 +38,35 @@ def set_admin(user_id, admin_bool)
 	end
 end
 
+######Command DB######
+
+def create_command(call, response)
+	command_name = call.downcase
+	begin
+		@db.execute("INSERT INTO command ( command_name, response, active) VALUES ( ?, ?, ? )", [command_name, response, 1])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
+def set_command_active(call, active)
+	command_name = call.downcase
+	begin
+		@db.execute("UPDATE command SET active = ? WHERE command_name = ?", [active, command_name])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
+def update_command(call, response)
+	command_name = call.downcase
+	begin
+		@db.execute("UPDATE command SET response = ? WHERE command_name = ?", [response, command_name])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
 ###################
 #Getter DB commands
 ###################
@@ -51,6 +82,17 @@ def get_user(name)
 		return user
 	else
 		puts "#{username} not found in db"
+		return nil
+	end
+end
+
+def get_command(call)
+	command_name = call.downcase
+	response = @db.execute( "SELECT response FROM command WHERE command_name LIKE ? AND acvite = 1", [command_name] ).first
+	if (response)
+		return response
+	else
+		puts "#{command_name} not found in db"
 		return nil
 	end
 end
