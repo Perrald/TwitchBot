@@ -86,7 +86,7 @@ module PerraldBot
 								write_to_chat("Giving #{tempname[1]} #{args.to_i} points, their total is now #{points}")
 							end
 						end
-					else if command.include? "!command"
+					elsif command.include? "!command"
 						if(user_is_an_admin(user))
 							if get_command(target)
 								if(update_command(target, arg.strip))
@@ -105,7 +105,7 @@ module PerraldBot
 					end
 					
 					
-				else if message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*) (.*)$/)
+				elsif message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*) (.*)$/)
 					user = $~[1]
 					command = $~[3]
 					args = $~[4]
@@ -147,7 +147,7 @@ module PerraldBot
 # user[3] = created, user[4] = last_seen, user[5] = admin, user[6] = profile
 # 
 				
-				else if message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*)$/)
+				elsif message.match(/^:(.+)!(.+) PRIVMSG ##{@channel} :(.*)$/)
 					user = $~[1]
 					command = $~[3]
 					if command.include? "!add"
