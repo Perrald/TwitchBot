@@ -71,7 +71,7 @@ end
 #Getter DB commands
 ###################
 #
-# result is an array: user[0] = id, user[1] = username, user[2] = points, 
+# result from user DB is an array: user[0] = id, user[1] = username, user[2] = points, 
 # user[3] = created, user[4] = last_seen, user[5] = admin, user[6] = profile
 # 
 
@@ -85,12 +85,20 @@ def get_user(name)
 		return nil
 	end
 end
-
+#
+# result from command DB is an array: user[0] = id, user[1] = command_name, 
+# user[2] = response, user[3] = active
+# 
 def get_command(call)
 	command_name = call.downcase
-	response = @db.execute( "SELECT response FROM command WHERE command_name LIKE ? AND acvite = 1", [command_name] ).first
-	if (response)
-		return response
+	command = @db.execute( "SELECT * FROM command WHERE command_name LIKE ?", [command_name]).first
+	if (command) 
+		if (command[3]) #check if active
+			return command[2] #return response
+		else
+			puts "#{command_name} not active"
+			return nil
+		end
 	else
 		puts "#{command_name} not found in db"
 		return nil
