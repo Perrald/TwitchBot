@@ -14,6 +14,14 @@ def create_user(name)
 	end
 end
 
+def remove_user(user_id)
+	begin
+		@db.execute("DELETE FROM users WHERE id = ?", [user_id])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
 def set_last_active(user_id)
 	begin
 		@db.execute("UPDATE users SET last_active = ? WHERE id = ?", [Time.now.utc.to_i, user_id])
@@ -43,7 +51,7 @@ end
 def create_command(call, response)
 	command_name = call.downcase
 	begin
-		@db.execute("INSERT INTO command ( command_name, response, active) VALUES ( ?, ?, ? )", [command_name, response, 1])
+		@db.execute("INSERT INTO commands ( command_name, response, active) VALUES ( ?, ?, ? )", [command_name, response, 1])
 		return true
 	rescue SQLite3::Exception => e
 	end
@@ -52,7 +60,7 @@ end
 def set_command_active(call, active)
 	command_name = call.downcase
 	begin
-		@db.execute("UPDATE command SET active = ? WHERE command_name = ?", [active, command_name])
+		@db.execute("UPDATE commands SET active = ? WHERE command_name = ?", [active, command_name])
 		return true
 	rescue SQLite3::Exception => e
 	end
@@ -61,12 +69,19 @@ end
 def update_command(call, response)
 	command_name = call.downcase
 	begin
-		@db.execute("UPDATE command SET response = ? WHERE command_name = ?", [response, command_name])
+		@db.execute("UPDATE commands SET response = ? WHERE command_name = ?", [response, command_name])
 		return true
 	rescue SQLite3::Exception => e
 	end
 end
 
+def remove_inactive_commands
+	begin
+		@db.execute("DELETE FROM commands WHERE active = 0")
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
 ###################
 #Getter DB commands
 ###################
@@ -91,14 +106,9 @@ end
 # 
 def get_command(call)
 	command_name = call.downcase
-	command = @db.execute( "SELECT * FROM command WHERE command_name LIKE ?", [command_name]).first
+	command = @db.execute( "SELECT * FROM commands WHERE command_name LIKE ?", [command_name]).first
 	if (command) 
-		if (command[3]) #check if active
-			return command[2] #return response
-		else
-			puts "#{command_name} not active"
-			return nil
-		end
+		return command #let user check for active 
 	else
 		puts "#{command_name} not found in db"
 		return nil
