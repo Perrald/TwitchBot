@@ -35,7 +35,8 @@ module PerraldBot
 			@db.execute "CREATE UNIQUE INDEX IF NOT EXISTS username ON users (username)"
 			
 			#Item Tables
-			@db.execute "CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, description TEXT, price INT, ownable INT, timestamp BIGINT)"
+			@db.execute "CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, command TEXT, price INT, ownable INT, timestamp BIGINT)"
+			@db.execute "CREATE UNIQUE INDEX IF NOT EXISTS name ON items (name)"
 			@db.execute "CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY, user_id INT, item_id INT, timestamp BIGINT)"
 			
 			#Command Table For Admins to create custom commands

@@ -46,6 +46,48 @@ def set_admin(user_id, admin_bool)
 	end
 end
 
+######Item DB######
+def create_item(name, command, price)
+	item_name = name.downcase
+	begin
+		@db.execute("INSERT INTO items ( name, command, price, ownable , timestamp) VALUES ( ?, ?, ?, ?, ? )", [item_name, command, price, 1, Time.now.utc.to_i])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
+def remove_item(item_id)
+	begin
+		@db.execute("DELETE FROM items WHERE id = ?", [item_id])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
+def set_price(item_id, price)
+	begin
+		@db.execute("UPDATE items SET price = ? WHERE id = ?", [price, item_id])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
+def set_ownable(item_id, ownable_bool)
+	begin
+		@db.execute("UPDATE items SET ownable = ? WHERE id = ?", [ownable_bool,  item_id])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
+def set_item_effect(item_id, command)
+	begin
+		@db.execute("UPDATE items SET command = ? WHERE id = ?", [command, item_id])
+		return true
+	rescue SQLite3::Exception => e
+	end
+end
+
 ######Command DB######
 
 def create_command(call, response)
@@ -101,8 +143,8 @@ def get_user(name)
 	end
 end
 #
-# result from command DB is an array: user[0] = id, user[1] = command_name, 
-# user[2] = response, user[3] = active
+# result from command DB is an array: command[0] = id, command[1] = command_name, 
+# command[2] = response, command[3] = active
 # 
 def get_command(call)
 	command_name = call.downcase
@@ -111,6 +153,20 @@ def get_command(call)
 		return command #let user check for active 
 	else
 		puts "#{command_name} not found in db"
+		return nil
+	end
+end
+#
+# result from item DB is an array: item[0] = id, item[1] = name, 
+# item[2] = command, item[3] = price, item[4] = ownable, item[5] = timestamp
+# 
+def get_item(name)
+	item_name = name.downcase
+	item = @db.execute( "SELECT * FROM items WHERE name LIKE ?", [item_name]).first
+	if (item) 
+		return item 
+	else
+		puts "#{item_name} not found in db"
 		return nil
 	end
 end

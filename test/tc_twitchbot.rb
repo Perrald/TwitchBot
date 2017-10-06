@@ -12,7 +12,8 @@ class TestTwitchBot < Test::Unit::TestCase
 		@db.execute "CREATE UNIQUE INDEX IF NOT EXISTS username ON users (username)"
 		
 		#Item Tables
-		@db.execute "CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, description TEXT, price INT, ownable INT, timestamp BIGINT)"
+		@db.execute "CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, command TEXT, price INT, ownable INT, timestamp BIGINT)"
+		@db.execute "CREATE UNIQUE INDEX IF NOT EXISTS name ON items (name)"
 		@db.execute "CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY, user_id INT, item_id INT, timestamp BIGINT)"
 		
 		#Command Table For Admins to create custom commands
@@ -72,4 +73,34 @@ class TestTwitchBot < Test::Unit::TestCase
 		assert_equal(nil, unit_user)
 	end
 	
+	def test_items
+		assert_equal(true,create_item("unititem", "swing", 500))
+		
+		unit_item = get_item("unititem")
+		assert_equal("unititem", unit_item[1])
+		
+		assert_equal("swing", unit_item[2])
+		set_item_effect(unit_item[0], "Swung")
+		unit_item = get_item("unititem")
+		assert_equal("Swung", unit_item[2])
+				
+		set_price(unit_item[0], 1000)
+		unit_item = get_item("unititem")
+		assert_equal(1000, unit_item[3])
+		set_price(unit_item[0], 2000)
+		unit_item = get_item("unititem")
+		assert_equal(2000, unit_item[3])
+		
+		assert_equal(1, unit_item[4])
+		set_ownable(unit_item[0], 0)
+		unit_item = get_item("unititem")
+		assert_equal(0, unit_item[4])
+		
+		remove_item(unit_item[0])
+		unit_item = get_item("unititem")
+		assert_equal(nil, unit_item)
+		
+	end
+	
 end
+
