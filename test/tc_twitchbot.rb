@@ -46,30 +46,30 @@ class TestTwitchBot < Test::Unit::TestCase
 	end
 
 	def test_users
-		assert_equal(true,create_user("unittest"))
+		assert_equal(true,create_user("unituser"))
 		
-		unit_user = get_user("unittest")
-		assert_equal("unittest", unit_user[1])
+		unit_user = get_user("unituser")
+		assert_equal("unituser", unit_user[1])
 		
 		time = unit_user[4]
 		set_last_active(unit_user[0])
-		unit_user = get_user("unittest")
+		unit_user = get_user("unituser")
 		assert_not_same(time, unit_user[4])
 		
 		set_points(unit_user[0], 2)
-		unit_user = get_user("unittest")
+		unit_user = get_user("unituser")
 		assert_equal(2, unit_user[2])
 		set_points(unit_user[0], 4)
-		unit_user = get_user("unittest")
+		unit_user = get_user("unituser")
 		assert_equal(4, unit_user[2])
 		
 		assert_equal(0, unit_user[5])
 		set_admin(unit_user[0], 1)
-		unit_user = get_user("unittest")
+		unit_user = get_user("unituser")
 		assert_equal(1, unit_user[5])
 		
 		remove_user(unit_user[0])
-		unit_user = get_user("unittest")
+		unit_user = get_user("unituser")
 		assert_equal(nil, unit_user)
 	end
 	
