@@ -164,6 +164,12 @@ module PerraldBot
 						all_users_in_channel = get_all_users_in_channel
 						write_to_chat("Users here:" + all_users_in_channel.to_s)
 					end
+					tempcommand = get_command(command)
+					if (tempcommand)
+						if (command[3])
+							write_to_chat(command[2])
+						end
+					end
 					# if command_hash.fetch(command_hash.keys.find{|key|command[key]}, "no key")!="no key"
 						# command_hash = reload_hash(user)
 						# write_to_chat(command_hash.fetch(command_hash.keys.find{|key|command[key]}))
